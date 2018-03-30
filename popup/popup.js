@@ -1,28 +1,40 @@
-// Update the relevant fields with the new data
-function setDOMInfo(info) {
-  console.log({
-    info,
-    document
-  });
-  document.getElementById('total').textContent   = info.total;
-  document.getElementById('inputs').textContent  = info.inputs;
-  document.getElementById('buttons').textContent = info.buttons;
+let store = {}
+
+window.addEventListener("DOMContentLoaded", () => {
+  chrome.tabs.query(
+    {
+      active: true,
+      currentWindow: true
+    },
+    tabs => {
+      chrome.runtime.sendMessage(
+        { type: "GET_DATA" },
+        response => {
+          store['__DATA__'] = response;
+          console.log(store)
+          pushNotif()
+        });
+    }
+  );
+});
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if(request.type === "_NOTIF_") {
+    sendResponse((data) => {
+      console.log(data);
+      pushNotif()
+    })
+  }
+});
+
+function pushNotif() {
+  const opt = {
+      type: "basic",
+      title: "Project1",
+      message: "This is my first extension.",
+      iconUrl: "../assets/icon-on.png"
+  };
+  console.log(opt)
+  chrome.notifications.create('okbb', opt);
 }
 
-// Once the DOM is ready...
-window.addEventListener('DOMContentLoaded', () => {
-  // ...query for the active tab...
-  chrome.tabs.query({
-    active: true,
-    currentWindow: true
-  }, (tabs) => {
-    alert(tabs)
-    // ...and send a request for the DOM info...
-    chrome.tabs.sendMessage(
-        tabs[0].id,
-        {from: 'popup', subject: 'DOMInfo'},
-        // ...also specifying a callback to be called
-        //    from the receiving end (content script)
-        setDOMInfo);
-  });
-});

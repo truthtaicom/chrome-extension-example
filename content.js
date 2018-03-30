@@ -1,13 +1,10 @@
 const elementToJSON = (data) => { // element.children
-  console.log(data, 'children')
   const text = data[0].outerText;
   const times = [...data]
   .filter((_, idx) => idx > 0)
   .map((el, idx) => el.textContent)
 
-  return {
-    text, times
-  }
+  return { text, times }
 }
 
 const projectsToJSON = (data) => {
@@ -39,15 +36,18 @@ const getData = (cb) => {
   const workingTime = workingTimeToJSON(currentList);
 
   cb({
-    products,
-    workingTime
+    products, workingTime
   })
-  console.log(productList)
-  console.log(workingTime)
 }
 
 getData((data) => {
-  chrome.runtime.sendMessage({
-    data
-  });
+  chrome.runtime.sendMessage({ type: '_DATA_', data });
 })
+
+chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
+  if(request.type === "GET_DATA") {
+    console.log({ request, _, sendResponse })
+    getData(sendResponse)
+  }
+});
+

@@ -1,25 +1,18 @@
-// let enabled = false;
+let store = {}
 
-// function updateIcon() {
-//   enabled = !enabled;
-//   const iconPath = `/assets/icon-${enabled && 'on' || 'off'}.png`;
-//   console.log(iconPath, 'iconPath')
-//   chrome.browserAction.setIcon({
-//     path: {
-//       16: iconPath,
-//       32: iconPath
-//     }
-//   });
-// }
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if(request.type === "_DATA_") {
+    store['_DATA_'] = request.data;
+    pushNotif(store['_DATA_'])
+  }
 
-// function getBadget() {
-//   chrome.browserAction.setBadgeText({ text: "10+" });
-// }
-
-chrome.runtime.onMessage.addListener((msg, sender) => {
-  // // First, validate the message's structure
-  // if ((msg.from === 'content') && (msg.subject === 'showPageAction')) {
-  //   // Enable the page-action for the requesting tab
-  //   chrome.pageAction.show(sender.tab.id);
-  // }
+  if(request.type === "GET_DATA") {
+    sendResponse(store['_DATA_'])
+  }
 });
+
+function pushNotif(data) {
+  chrome.runtime.sendMessage(
+    { type: "_NOTIF_" },
+    response => (data))
+}
