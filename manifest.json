@@ -18,10 +18,11 @@
     "default_popup": "popup/popup.html"
   },
   "content_scripts": [{
-    "matches": ["https://*/*"],
+    "matches": ["https://f6wf.com/resource/timesheets/*"],
     "js": [
       "content.js"
     ],
+    "css": ["bootstrap.min.css", "app.css"],
     "run_at": "document_idle"
   }]
 }
