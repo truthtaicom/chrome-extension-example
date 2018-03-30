@@ -1,42 +1,53 @@
-// Inform the background page that
-// this tab should have a page-action
-// chrome.runtime.sendMessage({
-//   from:    'content',
-//   subject: 'showPageAction'
-// });
+const elementToJSON = (data) => { // element.children
+  console.log(data, 'children')
+  const text = data[0].outerText;
+  const times = [...data]
+  .filter((_, idx) => idx > 0)
+  .map((el, idx) => el.textContent)
 
-const getData = () => {
-  const $form = document.querySelectorAll('form table')[1];
-  const $list = $form.querySelectorAll('select option')
-
-  const productList = [...$list]
-    .map(el => ({ id: el.value, text: el.text }))
-    .filter(el => el.id)
-
-  console.log($form)
-  console.log(productList)
+  return {
+    text, times
+  }
 }
 
-getData()
+const projectsToJSON = (data) => {
+  return data
+  .map(el => ({id: el.value, text: el.text}))
+  .filter(el => el.id)
+}
 
-// // Listen for messages from the popup
-// chrome.runtime.onMessage.addListener((msg, sender, response) => {
-//   // First, validate the message's structure
-//   if ((msg.from === 'popup') && (msg.subject === 'DOMInfo')) {
-//     console.log(document, 'document')
-//     // Collect the necessary data
-//     // (For your specific requirements `document.querySelectorAll(...)`
-//     //  should be equivalent to jquery's `$(...)`)
-//     var domInfo = {
-//       total:   document.querySelectorAll('*').length,
-//       inputs:  document.querySelectorAll('input').length,
-//       buttons: document.querySelectorAll('button').length
-//     };
+const workingTimeToJSON = (data) => {
+  return data
+  .filter((_, idx) => idx < data.length -1)
+  .map(({ children }) => elementToJSON(children))
+}
 
-//     console.log({domInfo});
+const getData = (cb) => {
+  // Get table dom
+  const $form = document.querySelectorAll('form table')[1];
+  // Get all tr in table dom
+  const $formItem = $form.querySelectorAll(':scope > tbody > tr');
+  // get time working form
+  const currentList = [...$formItem].splice(2, $formItem.length - 4);
+  // get project form DOM
+  const lastItemCurrentList = currentList[currentList.length - 1]
+  // get project list DOM
+  const $list = lastItemCurrentList.querySelectorAll('select option');
+  // get project list as JSON
+  const products = projectsToJSON([...$list])
+  // get working time as JSON
+  const workingTime = workingTimeToJSON(currentList);
 
-//     // Directly respond to the sender (popup),
-//     // through the specified callback */
-//     response(domInfo);
-//   }
-// });
+  cb({
+    products,
+    workingTime
+  })
+  console.log(productList)
+  console.log(workingTime)
+}
+
+getData((data) => {
+  chrome.runtime.sendMessage({
+    data
+  });
+})
