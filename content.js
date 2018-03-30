@@ -41,13 +41,5 @@ const getData = (cb) => {
 }
 
 getData((data) => {
-  chrome.runtime.sendMessage({ type: '_DATA_', data });
+  chrome.runtime.sendMessage({ type: '_SET_DATA_', data });
 })
-
-chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
-  if(request.type === "GET_DATA") {
-    console.log({ request, _, sendResponse })
-    getData(sendResponse)
-  }
-});
-

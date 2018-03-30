@@ -1,18 +1,14 @@
-let store = {}
+let store = {};
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if(request.type === "_DATA_") {
-    store['_DATA_'] = request.data;
-    pushNotif(store['_DATA_'])
-  }
-
-  if(request.type === "GET_DATA") {
-    sendResponse(store['_DATA_'])
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  switch (message.type) {
+    case "_SET_DATA_":
+      store["_DATA_"] = message.data;
+      break;
+    case "_GET_DATA_":
+      sendResponse(store);
+      break;
+    default:
+      console.error("Unrecognized message: ", message);
   }
 });
-
-function pushNotif(data) {
-  chrome.runtime.sendMessage(
-    { type: "_NOTIF_" },
-    response => (data))
-}
