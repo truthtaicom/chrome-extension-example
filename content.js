@@ -1,15 +1,32 @@
+const splitHrefToObject = (data) => {
+  if (data) {
+    const stringS1 = data.replace("javascript:setHours(", "")
+    const stringS2 = stringS1.replace(")", "");
+    const stringS3 = stringS2.replace(" ", "")
+    const stringS4 = stringS3.replace(/'/g, "")
+    return stringS4.split(',')
+  }
+  return null
+}
+
 const elementToJSON = (data) => { // element.children
   const text = data[0].outerText;
   const times = [...data]
   .filter((_, idx) => idx > 0)
-  .map((el, idx) => el.textContent)
+  .map((el, idx) => ({
+    value: el.textContent,
+    link: splitHrefToObject(el.children[0].href)
+  }))
 
   return { text, times }
 }
 
 const projectsToJSON = (data) => {
   return data
-  .map(el => ({id: el.value, text: el.text}))
+  .map(el => ({
+    id: el.value,
+    text: el.text
+  }))
   .filter(el => el.id)
 }
 
